@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#Linux System Cleanup Utility
+
+echo "Welcome to the Simple System Cleanup Tool"
+
+#Step 1: Clean temporary files
+
+echo "Cleaning temporary files from /tmp..."
+
+sudo rm -rf /tmp/*
+
+echo "Temporary files cleaned."
+
+# Step 2: Clean package manager cache (for Ubuntu/Debian)
+
+echo "Cleaning APT package cache..."
+
+sudo apt clean
+
+echo "APT cache cleaned."
+
+# Step 3: Clean old log files
+
+echo "Cleaning log files from /var/log..."
+
+sudo rm -rf /var/log/*.log
+
+echo "Log files cleaned."
+
+echo "System cleanup complete!"
