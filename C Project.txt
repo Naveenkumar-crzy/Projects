@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_LINE_LENGTH 1024
+#define TEMP_THRESHOLD 95.0
+#define INPUT_FILE "Temperature_data.csv"
+#define OUTPUT_FILE "high_temp_log.csv"
+
+int main() {
+    FILE *fp = fopen(INPUT_FILE, "r");
+    if (!fp) {
+        perror("Error opening input file");
+        return 1;
+    }
+
+    FILE *highTempFile = fopen(OUTPUT_FILE, "w");
+    if (!highTempFile) {
+        perror("Error creating high temperature file");
+        fclose(fp);
+        return 1;
+    }
+
+    char line[MAX_LINE_LENGTH];
+    double temp, totalTemp = 0.0;
+    double maxTemp = -9999.0;
+    double minTemp = 9999.0;
+    int count = 0;
+
+    // Skip header
+    fgets(line, sizeof(line), fp);
+    fprintf(highTempFile, "timestamp,sensor_id,temperature\n");  // header for high temp file
+
+    while (fgets(line, sizeof(line), fp)) {
+        char timestamp[64], sensor_id[32];
+        double temperature;
+
+        // Parse CSV line
+        if (sscanf(line, "%63[^,],%31[^,],%lf", timestamp, sensor_id, &temperature) == 3) {
+            totalTemp += temperature;
+            if (temperature > maxTemp) maxTemp = temperature;
+            if (temperature < minTemp) minTemp = temperature;
+            count++;
+
+            if (temperature > TEMP_THRESHOLD) {
+                fprintf(highTempFile, "%s,%s,%.2f\n", timestamp, sensor_id, temperature);
+            }
+        }
+    }
+
+    fclose(fp);
+    fclose(highTempFile);
+
+    if (count > 0) {
+        double averageTemp = totalTemp / count;
+        printf("Total Readings: %d\n", count);
+        printf("Average Temperature: %.2f°C\n", averageTemp);
+        printf("Maximum Temperature: %.2f°C\n", maxTemp);
+        printf("Minimum Temperature: %.2f°C\n", minTemp);
+        printf("Temperature readings above %.2f°C have been stored in '%s'\n", TEMP_THRESHOLD, OUTPUT_FILE);
+    } else {
+        printf("No valid data found.\n");
+    }
+
+    return 0;
+}
