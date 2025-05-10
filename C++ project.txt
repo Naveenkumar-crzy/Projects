@@ -1,0 +1,82 @@
+#include <iostream> 
+#include <string> 
+ 
+using namespace std; 
+ 
+class InventoryItem { 
+public: 
+    int itemID; 
+    string itemName; 
+    int quantity; 
+    int warrantyPeriod; 
+ 
+    InventoryItem() {} 
+    InventoryItem(int id, string name, int qty, int warranty) 
+        : itemID(id), itemName(name), quantity(qty), warrantyPeriod(warranty) {} 
+ 
+    void display() { 
+        cout << "Item ID: " << itemID << ", Name: " << itemName 
+             << ", Quantity: " << quantity << ", Warranty: " << warrantyPeriod << " years" << endl; 
+    } 
+}; 
+ 
+class Inventory { 
+private: 
+    InventoryItem items[10]; 
+    int itemCount; 
+public: 
+    Inventory() : itemCount(0) {} 
+ 
+    void addItem(int id, string name, int qty, int warranty) { 
+        if (itemCount >= 10) { 
+            cout << "Inventory full!" << endl; 
+            return; 
+        } 
+        items[itemCount++] = InventoryItem(id, name, qty, warranty); 
+    } 
+ 
+    void displayInventory() { 
+        cout << "\nCurrent Inventory:" << endl; 
+        for (int i = 0; i < itemCount; i++) { 
+            items[i].display(); 
+        } 
+    } 
+ 
+    void findItem(int id) { 
+        for (int i = 0; i < itemCount; i++) { 
+            if (items[i].itemID == id) { 
+                cout << "Found Item - "; 
+                items[i].display(); 
+                return; 
+            } 
+        } 
+        cout << "Item with ID " << id << " not found." << endl; 
+    } 
+ 
+    void removeItem(int id) { 
+        for (int i = 0; i < itemCount; i++) { 
+            if (items[i].itemID == id) { 
+                cout << "Removing Item - "; 
+                items[i].display(); 
+                for (int j = i; j < itemCount - 1; j++) { 
+                    items[j] = items[j + 1]; 
+                } 
+                itemCount--; 
+                return; 
+            } 
+        } 
+        cout << "Item with ID " << id << " not found." << endl; 
+    } 
+}; 
+ 
+int main() { 
+    Inventory inventory; 
+    inventory.addItem(101, "Laptop", 50, 2); 
+    inventory.addItem(102, "Monitor", 30, 3); 
+     
+    inventory.displayInventory(); 
+inventory.findItem(101); 
+inventory.removeItem(102); 
+inventory.displayInventory(); 
+return 0; 
+}
