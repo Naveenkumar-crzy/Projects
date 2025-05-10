@@ -1,0 +1,110 @@
+// Define the WiFi credentials and Blynk Auth Token
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+#include <BlynkSimpleEsp8266.h>
+#include <DHT.h>
+
+char auth[] = "zN6BmBJ9tZtOOsesqsR4OyJZ8B4FolmA";  // Replace with your Blynk Auth Token
+char ssid[] = "Network";              // Replace with your WiFi SSID
+char pass[] = "12345678";          // Replace with your WiFi password
+#define TRIG_PIN 5   // Trigger pin
+#define ECHO_PIN 4   // Echo pin
+#define DHTPIN 10     // DHT sensor connected to NodeMCU D4 (GPIO2)
+#define DHTTYPE DHT22    // or DHT22
+#define light 2
+#define light1 15
+#define VIRTUAL_PIN_TEMP V1
+#define VIRTUAL_PIN_HUM  V2
+
+DHT dht(DHTPIN, DHTTYPE);
+// Variable to store the distance
+long duration;
+int distance;
+
+void setup() {
+  // Start the serial communication
+  Serial.begin(115200);
+
+  // Set the Trigger and Echo pins as OUTPUT and INPUT
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(light, OUTPUT); 
+pinMode(light1, OUTPUT); 
+  // Connect to WiFi
+  WiFi.begin(ssid, pass);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
+
+  // Initialize the Blynk library
+  Blynk.begin(auth, ssid, pass);
+}
+
+
+
+
+
+void loop() {
+  // Clear the Trigger pin by setting it LOW
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+
+  // Set the Trigger pin HIGH to send a pulse
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+
+  // Set the Trigger pin LOW again to stop the pulse
+  digitalWrite(TRIG_PIN, LOW);
+
+  // Read the duration of the pulse from the Echo pin
+  duration = pulseIn(ECHO_PIN, HIGH);
+
+  // Calculate the distance based on the speed of sound (343 meters per second)
+  distance = duration * 0.0344 / 2; // in cm
+Blynk.virtualWrite(V0,distance);
+  // Print the distance to the Serial Monitor
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+   float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature(); // Celsius
+
+  if (isnan(humidity) || isnan(temperature)) {
+    Serial.println("Failed to read from DHT sensor!");
+  }
+ Serial.print("Temperature: ");
+  Serial.print(temperature);
+  Serial.print(" °C, Humidity: ");
+  Serial.print(humidity);
+  Serial.println(" %");
+
+  // Send data to Blynk
+  Blynk.virtualWrite(V1, temperature);
+  Blynk.virtualWrite(V2, humidity);
+  if (distance<20)
+  {
+    digitalWrite(light, HIGH);
+    Serial.println("Light is ON");
+  }
+  else
+  {
+     digitalWrite(light,LOW);
+  }
+   if (distance>20)
+  {
+    digitalWrite(light1, HIGH);
+    Serial.println("Light is ON");
+  }
+  else
+  {
+     digitalWrite(light1,LOW);
+  }
+  // Wait a little before taking another reading
+  delay(100);
+   Blynk.run();
+  
+}
+
